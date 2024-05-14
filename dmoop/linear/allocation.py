@@ -197,3 +197,34 @@ class Linear2DAllocation:
 
         beta = np.prod(beta, axis = 0) # final beta value
         return np.round(beta, ndigits) if ndigits else beta
+
+
+    def epsilon(self, index : int = 0, method : str = "mean", **kwargs) -> np.ndarray:
+        """
+        An Appreciation Factor for Objective Funtion to Maximize
+        """
+
+        x = self.xs[index]
+        driver = self.__describe_array__(x, method) / x
+        return self.beta(**kwargs) / driver
+
+
+    def factor(self, mround : float = 0.05, appreciate : bool = True, **kwargs) -> np.ndarray:
+        """
+        Final Allocation Factor (in percentage) for Linear 2D Optimization
+
+        The function calculates the final factor to allocate across a
+        2D array of shape :attr:`(N, q)` and returns a percentage
+        value which can be directly used for problems like share of
+        business allocation in a typical supply chain problem.
+        """
+
+        appreciate_index = kwargs.get("appreciate_index", 0)
+        appreciate_method = kwargs.get("appreciate_method", "mean")
+
+        _x = self.xs[appreciate_index]
+        _beta = self.beta(**kwargs)
+
+        _epsilon = self.__describe_array__(_x, appreciate_method)
+        appreciated_value = _beta / _epsilon if appreciate else _beta
+        return appreciated_value
