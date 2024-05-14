@@ -8,3 +8,5 @@ the polynomials are either zero or one. In case of two independent
 variables :attr:`f(x, y)` the graph is a straight line or in case of
 three variables :attr:`f(x, y, z)` it is a plane.
 """
+
+from dmoop.linear.allocation import Linear2DAllocation # pyright: ignore[reportMissingImports]

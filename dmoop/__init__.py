@@ -11,3 +11,6 @@ objectives with premiumizationpenalty and value appreciation controls.
 # ? package follows https://peps.python.org/pep-0440/
 # ? https://python-semver.readthedocs.io/en/latest/advanced/convert-pypi-to-semver.html
 __version__ = "0.0.1.dev0"
+
+# register for init-time options registrations
+from dmoop.linear import * # noqa: F401, F403 # pyright: ignore[reportMissingImports]
