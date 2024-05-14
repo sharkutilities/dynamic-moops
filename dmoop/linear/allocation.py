@@ -107,7 +107,7 @@ class Linear2DAllocation:
         return senses.reshape(-1, 1)
 
 
-    def __describe_function_dispatch__(self, array : np.ndarray, method : str) -> callable:
+    def __describe_array__(self, array : np.ndarray, method : str) -> callable:
         """Dispatch any of the Aggregation Function"""
 
         methods = dict(
@@ -153,7 +153,7 @@ class Linear2DAllocation:
         factors = np.array(kwargs.get("factors", np.ones(self.N)))
 
         delta = np.abs([
-            x - self.__describe_function_dispatch__(x, method = method)
+            x - self.__describe_array__(x, method = method)
             for method, x in zip(methods, self.xs)
         ]) * factors.reshape(-1, 1)
 
