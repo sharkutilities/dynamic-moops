@@ -160,7 +160,7 @@ class Linear2DAllocation:
         return delta
 
 
-    def beta(self, **kwargs) -> np.ndarray:
+    def beta(self, ndigits : int = None, **kwargs) -> np.ndarray:
         """
         An Intermediate Derived Factor that Combines Senses and Delta
 
@@ -176,12 +176,24 @@ class Linear2DAllocation:
         function while reverse is true for *premiumization* i.e., the
         penalty factor where the value is added and reciprocal is
         calculated to find the allocation factor.
+
+        :type  ndigits: int
+        :param ndigits: Round the :attr:`ϐ`-factor to the number of
+            digits, defaults to :attr:`None` (i.e., no rounding).
+
+        Keyword Arguments
+        -----------------
+        The function accepts all keyword arguments as accepted by
+        the :meth:`delta` function.
         """
 
         delta = self.delta(**kwargs)
-        alpha = np.array([
+
+        # ? calculate beta which also considers penalty/appreciation
+        beta = np.array([
             1 / (x + d) if sense == -1 else x - d
             for sense, x, d in zip(self.senses, self.xs, delta)
         ])
 
-        return alpha
+        beta = np.prod(beta, axis = 0) # final beta value
+        return np.round(beta, ndigits) if ndigits else beta
