@@ -226,5 +226,6 @@ class Linear2DAllocation:
         _beta = self.beta(**kwargs)
 
         _epsilon = self.__describe_array__(_x, appreciate_method)
-        appreciated_value = _beta / _epsilon if appreciate else _beta
+        _epsilon = _epsilon / _x if appreciate else _beta
+        appreciated_value = _beta / _epsilon
         return appreciated_value
