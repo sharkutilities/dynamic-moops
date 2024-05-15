@@ -50,14 +50,34 @@ class Linear2DAllocation:
         maximization (:attr:`+1`) or minimization (:attr:`-1`). If
         scaler, then all the objective is same or individually defined
         using a vector. The senses should be a (n, -1) dimensional.
+
+    Keyword Arguments
+    -----------------
+        * **drop_outliers** (*bool*): Default False, remove outlier
+            from the input :attr:`xs` using quartile range.
+
+        * **outlier_direction** (*str* or *tuple*): Default to
+            :attr:`str == "both"` i.e., removes from both the direction
+            if :math:`x_i >= abs(IQR(x))` else, based on the boundary
+            value.
+
+        * **outlier_bounds** (*tuple*): Left and right bounds, defaults
+            to :attr:`(0.25, 0.75)` i.e., any value above IQR3 and
+            below IQR1 are removed.
     """
 
-    def __init__(self, xs : list, senses : list | int) -> None:
+    def __init__(self, xs : list, senses : list | int, **kwargs) -> None:
         self.xs = self._xs(xs) # ? conversion, assertion of `xs`
         self.senses = self._senses(senses) # ? problem objective/sense
 
         self.N = 2 # ! only two dimensional supported
         self.q = self.xs.shape[1] # ? q-variable in each dimension
+
+        if kwargs.get("drop_outliers", False):
+            outlier_bounds = kwargs.get("outlier_bounds", (0.25, 0.75))
+            outlier_direction = kwargs.get("outlier_direction", "both")
+
+            self.xs = self.__treat_outliers__(outlier_bounds, outlier_direction)
 
 
     def _xs(self, array : list) -> np.ndarray:
@@ -118,6 +138,32 @@ class Linear2DAllocation:
         )
 
         return methods[method](array)
+
+
+    def __treat_outliers__(self, bounds : tuple, direction : str | tuple) -> np.ndarray:
+        """Method to Remove Outlier from a Feature"""
+
+        _l_quartile = np.quantile(self.xs, bounds[0], axis = 1)
+        _u_quartile = np.quantile(self.xs, bounds[1], axis = 1)
+
+        # ? expand the directions for across the axis, and treat each axis
+        direction = np.array([direction] * self.N if isinstance(direction, str) else direction)
+
+        xs_ = [] # ? remove outlier based on condition, if string then apply same method across axis
+        for idx in range(self.N):
+            array = self.xs[idx]
+            direction_ = direction[idx]
+
+            if direction_ in ("left", "both"):
+                xs_.append([ 0 if elem > _l_quartile[idx] else elem for elem in array ])
+
+            elif direction_ in ("right", "both"):
+                xs_.append([ elem if elem < _u_quartile[idx] else 0 for elem in array ])
+
+            else:
+                xs_.append(array) # ? when any condition is None/any other value
+
+        return np.array(xs_)
 
 
     def delta(self, **kwargs) -> np.ndarray:
@@ -195,6 +241,7 @@ class Linear2DAllocation:
             for sense, x, d in zip(self.senses, self.xs, delta)
         ])
 
+        beta = np.where(beta == np.inf, 0, beta) # zero division
         beta = np.prod(beta, axis = 0) # final beta value
         return np.round(beta, ndigits) if ndigits else beta
 
