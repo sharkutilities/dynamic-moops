@@ -275,4 +275,7 @@ class Linear2DAllocation:
         _epsilon = self.__describe_array__(_x, appreciate_method)
         _epsilon = _epsilon / _x if appreciate else _beta
         appreciated_value = _beta / _epsilon
-        return appreciated_value
+
+        percentage_allocation = appreciated_value / appreciated_value.sum()
+        percentage_allocation_rounded = mround * np.round(percentage_allocation / mround)
+        return appreciated_value, percentage_allocation, percentage_allocation_rounded
