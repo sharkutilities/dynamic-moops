@@ -127,17 +127,10 @@ class Linear2DAllocation:
         return senses.reshape(-1, 1)
 
 
-    def __describe_array__(self, array : np.ndarray, method : str) -> callable:
+    def __describe_array__(self, array : np.ndarray, method : callable) -> np.ndarray:
         """Dispatch any of the Aggregation Function"""
 
-        methods = dict(
-            min = np.min,
-            max = np.max,
-            mean = np.mean,
-            median = np.median
-        )
-
-        return methods[method](array)
+        return method(array) # ..versionchanged:: 16-05-2024 #1 - add method as callable
 
 
     def __treat_outliers__(self, bounds : tuple, direction : str | tuple) -> np.ndarray:
@@ -195,7 +188,7 @@ class Linear2DAllocation:
             :math:`\tau_i` is the factor for the objective function.
         """
 
-        methods = kwargs.get("methods", ["mean"] * self.N)
+        methods = kwargs.get("methods", [np.mean] * self.N)
         factors = np.array(kwargs.get("factors", np.ones(self.N)))
 
         delta = np.abs([
@@ -246,7 +239,7 @@ class Linear2DAllocation:
         return np.round(beta, ndigits) if ndigits else beta
 
 
-    def epsilon(self, index : int = 0, method : str = "mean", **kwargs) -> np.ndarray:
+    def epsilon(self, index : int = 0, method : str = np.mean, **kwargs) -> np.ndarray:
         """
         An Appreciation Factor for Objective Funtion to Maximize
         """
@@ -267,7 +260,7 @@ class Linear2DAllocation:
         """
 
         appreciate_index = kwargs.get("appreciate_index", 0)
-        appreciate_method = kwargs.get("appreciate_method", "mean")
+        appreciate_method = kwargs.get("appreciate_method", np.mean)
 
         _x = self.xs[appreciate_index]
         _beta = self.beta(**kwargs)
