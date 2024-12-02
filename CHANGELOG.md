@@ -38,12 +38,17 @@ this [link](https://python-semver.readthedocs.io/en/latest/advanced/convert-pypi
 
 The release notes are documented, the list of changes to each different release are documented. The `major.minor` patch are indicated
 under `h3` tags, while the `micro` and "version identifiers" are listed under `h4` and subsequent headlines. The legend for
-changelogs are as follows:
+changelogs are provided in the detail pane, while the version wise note is as available below.
+
+<details>
+<summary>Click to open Legend(s) Styilng Guide</summary>
 
   * 🎉 - **Major Feature** : something big that was not available before.
   * ✨ - **Feature Enhancement** : a miscellaneous minor improvement of an existing feature.
   * 🛠️ - **Patch/Fix** : something that previously didn’t work as documented – or according to reasonable expectations – should now work.
   * ⚙️ - **Code Efficiency** : an existing feature now may not require as much computation or memory.
   * 💣 - **Code Refactoring** : a breakable change often associated with `major` version bump.
+
+</summary>
 
 </div>
