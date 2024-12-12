@@ -26,7 +26,8 @@ class BaseConstruct(ABC):
         self._modelname = kwargs.get("modelname", None)
 
 
-    def describe(self, axis : int = None, method : str = callable) -> np.ndarray:
+    @staticmethod
+    def describe(xs : np.ndarray, axis : int = None, method : str = callable) -> np.ndarray:
         """
         Describe the Input Feature based on a Callable Method
 
@@ -45,7 +46,7 @@ class BaseConstruct(ABC):
             user defined function or callable.
         """
 
-        return method(self.xs, axis = axis)
+        return method(xs, axis = axis)
 
 
     @property
@@ -96,7 +97,7 @@ class BaseConstruct(ABC):
         senses = np.array(senses) if isinstance(senses, iterables) \
             else np.ones(self.xs.shape[0]) * senses
 
-        ndim_, cur = self.xs.ndim[0], self.xs.shape[0]
+        ndim_, cur = self.xs.shape[0], self.xs.shape[0]
         assert senses.shape[0] == self.xs.shape[0], \
             f"Number of Senses and Features must match, but got {ndim_} and {cur}"
 

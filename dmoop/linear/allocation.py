@@ -10,7 +10,10 @@ either minimization of maximization of all variables individually.
 
 import numpy as np
 
-class Linear2DAllocation:
+from typing import Iterable
+from dmoop.base import BaseConstruct
+
+class Linear2DAllocation(BaseConstruct):
     """
     A Linear Allocation Algorithm for 2-Dimensional Optimization
 
@@ -66,71 +69,14 @@ class Linear2DAllocation:
             below IQR1 are removed.
     """
 
-    def __init__(self, xs : list, senses : list | int, **kwargs) -> None:
-        self.xs = self._xs(xs) # ? conversion, assertion of `xs`
-        self.senses = self._senses(senses) # ? problem objective/sense
-
-        self.N = 2 # ! only two dimensional supported
-        self.q = self.xs.shape[1] # ? q-variable in each dimension
+    def __init__(self, xs : Iterable, senses : Iterable, **kwargs) -> None:
+        super().__init__(xs = xs, senses = senses, **kwargs)
 
         if kwargs.get("drop_outliers", False):
             outlier_bounds = kwargs.get("outlier_bounds", (0.25, 0.75))
             outlier_direction = kwargs.get("outlier_direction", "both")
 
             self.xs = self.__treat_outliers__(outlier_bounds, outlier_direction)
-
-
-    def _xs(self, array : list) -> np.ndarray:
-        """
-        Function to Assert Input Feature and Check for Ragged Nested Sequence
-
-        The input feature (`xs`) must not be a ragged nested sequence, i.e., all
-        the dimension must match the first dimension. The `VisibleDeprecationWarning`
-        raised by :mod:`numpy` can however be ignore by passing `dtype = object`
-        but this is rejected by the algorithm.
-
-        :type  array: iterable
-        :param array: An iterable non-ragged sequence of the shape :attr:`(2, q)`
-            where :attr:`n = 2` is the number of rows, while `q` is the number of features
-            and/or variables to allocate share.
-        """
-
-        array = np.stack(np.array(array, dtype = float))
-        assert array.shape[0] == 2, "Only 2-Dimensional/Objective Function Supported"
-
-        return array
-
-
-    def _senses(self, senses : list | int) -> np.ndarray:
-        """
-        Set the Objective/Sense of all Input Dimensions (:attr:`n`) for Problem
-
-        The objective/sense of individual element can be either a
-        minimization or maximization based on the requirement. For
-        minimization set :attr`sense = -1` while for maximization of set
-        :attr`sense = +1`. If a scalar value is passed, then all the features
-        are set to single objective based on value.
-
-        WARNING: Typically, this algorithm should not be used in-case of
-        single objective and sophisticated libraries like :mod:`PuLP` or
-        :mod:`scipy` should be used.
-
-        :type  senses: list
-        :param senses: Set the sense or objective of the problem. Set
-            :attr`sense = -1` for minimization while :attr`sense = +1`
-            for maximization.
-        """
-
-        senses = np.array(senses) if isinstance(senses, (list, tuple, np.ndarray)) \
-            else np.ones(self.xs.shape[0]) * senses
-
-        return senses.reshape(-1, 1)
-
-
-    def __describe_array__(self, array : np.ndarray, method : callable) -> np.ndarray:
-        """Dispatch any of the Aggregation Function"""
-
-        return method(array) # ..versionchanged:: 16-05-2024 #1 - add method as callable
 
 
     def __treat_outliers__(self, bounds : tuple, direction : str | tuple) -> np.ndarray:
@@ -192,7 +138,7 @@ class Linear2DAllocation:
         factors = np.array(kwargs.get("factors", np.ones(self.N)))
 
         delta = np.abs([
-            x - self.__describe_array__(x, method = method)
+            x - self.describe(x, method = method)
             for method, x in zip(methods, self.xs)
         ]) * factors.reshape(-1, 1)
 
@@ -245,7 +191,7 @@ class Linear2DAllocation:
         """
 
         x = self.xs[index]
-        driver = self.__describe_array__(x, method) / x
+        driver = self.describe(x, method) / x
         return self.beta(**kwargs) / driver
 
 
@@ -265,9 +211,10 @@ class Linear2DAllocation:
         _x = self.xs[appreciate_index]
         _beta = self.beta(**kwargs)
 
-        _epsilon = self.__describe_array__(_x, appreciate_method)
+        _epsilon = self.describe(_x, appreciate_method)
         _epsilon = _epsilon / _x if appreciate else _beta
         appreciated_value = _beta / _epsilon
+        appreciated_value = np.where(appreciated_value < 1e-9, 0, appreciated_value)
 
         percentage_allocation = appreciated_value / appreciated_value.sum()
         percentage_allocation_rounded = mround * np.round(percentage_allocation / mround)
