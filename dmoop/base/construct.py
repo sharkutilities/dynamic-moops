@@ -76,6 +76,16 @@ class BaseConstruct(ABC):
         pass
 
 
+    @abstractmethod
+    def fit(self, *args, **kwargs) -> None:
+        pass
+
+
+    @abstractmethod
+    def predict(self, *args, **kwargs) -> np.ndarray:
+        pass
+
+
     @property
     def modelname(self) -> str:
         """
