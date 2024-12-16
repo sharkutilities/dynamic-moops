@@ -20,7 +20,9 @@ class BaseConstruct(ABC):
         self.senses = self._senses(senses) # ? problem objective(s)
 
         # set the class attribute `N` and `q` for the problem
-        self.N, self.q = self.xs.shape
+        # N: no. of observations, typically the number of data points
+        # q: no. of features, which must be equal to the senses shape
+        self.N, self.q = self.xs.shape[::-1]
 
         # ? optional arguments with defaults for base construct
         self._modelname = kwargs.get("modelname", None)
