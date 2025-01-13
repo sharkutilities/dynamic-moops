@@ -29,7 +29,12 @@ class BaseConstruct(ABC):
 
 
     @staticmethod
-    def describe(xs : np.ndarray, axis : int = None, method : callable = np.mean) -> np.ndarray:
+    def describe(
+        xs : np.ndarray,
+        axis : int = None,
+        method : callable = np.mean,
+        **kwargs
+    ) -> np.ndarray:
         """
         Describe the Input Feature based on a Callable Method
 
@@ -62,6 +67,13 @@ class BaseConstruct(ABC):
             The method is now a callable argument which accepts any
             user defined function or callable.
 
+        Keyword Arguments
+        -----------------
+
+        The keyword argument gives the control to the underlying method
+        and is directly passed to the method. This should not be used
+        for other use cases for controlling.
+
         Return Data
         -----------
 
@@ -72,7 +84,7 @@ class BaseConstruct(ABC):
         :return: A reduced array based on the input function.
         """
 
-        return method(xs, axis = axis)
+        return method(xs, axis = axis, **kwargs)
 
 
     @abstractmethod
