@@ -88,33 +88,6 @@ class BaseConstruct(ABC):
 
 
     @abstractmethod
-    def delta(self, *args, **kwargs) -> np.ndarray:
-        """
-        Calculate the :math:`\delta` Factor basis the Aggregation Function
-
-        The :math:`\delta` factor is mathematically difference between
-        the input feature and the aggregation function of choice. A
-        typical value can be mathematically represented as
-        :math:`|x_i - f(x)|` where :math:`f` is the aggregation
-        function (like :attr:`mean`) of choice.
-        """
-
-        pass
-
-
-    @abstractmethod
-    def beta(self, *args, **kwargs) -> np.ndarray:
-        """
-        An Intermediate Derived :math:`\beta` Factor
-
-        The intermediate :math:`\beta` factor combines the senses and
-        the feature array to give a weightage value to each entity.
-        """
-
-        pass
-
-
-    @abstractmethod
     def fit(self, *args, **kwargs) -> None:
         pass
 
