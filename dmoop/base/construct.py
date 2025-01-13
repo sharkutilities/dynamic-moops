@@ -145,9 +145,10 @@ class BaseConstruct(ABC):
         senses = np.array(senses) if isinstance(senses, iterables) \
             else np.ones(self.xs.shape[0]) * senses
 
-        ndim_, cur = self.xs.shape[0], self.xs.shape[0]
-        assert senses.shape[0] == self.xs.shape[0], \
-            f"Number of Senses and Features must match, but got {ndim_} and {cur}"
+        ndim_, cur_ = self.xs.shape[0], senses.shape[0]
+        assert ndim_ == cur_, \
+            f"Number of Senses ({cur_}) must match" +\
+            f"the Number of Features ({ndim_})."
 
         return senses.reshape(-1, 1)
 
