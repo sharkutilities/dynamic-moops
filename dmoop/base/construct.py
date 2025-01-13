@@ -29,7 +29,7 @@ class BaseConstruct(ABC):
 
 
     @staticmethod
-    def describe(xs : np.ndarray, axis : int = None, method : str = callable) -> np.ndarray:
+    def describe(xs : np.ndarray, axis : int = None, method : callable = np.mean) -> np.ndarray:
         """
         Describe the Input Feature based on a Callable Method
 
@@ -37,15 +37,39 @@ class BaseConstruct(ABC):
         :mod:`numpy` library. Other custom methods if passed must
         support the :attr`axis` argument.
 
+        :type  xs: np.ndarray
+        :param xs: Input array of shape :attr:`(N, q)` where :attr:`N`
+            is the number of data points and :attr:`q` is the number
+            of features.
+
+        :type  axis: int
+        :param axis: Axis along which the method is applied, defaults
+            to `None` which means the method is applied along the
+            first axis. Defaults to None.
+
         ..versionchanged:: 2024-12-11 GH#4
 
             The axis argument is now available, defaults to `None` as
             in the base :mod:`numpy` method.
 
+        :type  method: callable
+        :param method: Any reduction function that supports :attr:`axis`
+            argument, prefered to be a :mod:`numpy` method. Defaults to
+            `np.mean`, i.e., the average.
+
         ..versionchanged:: 2024-05-16 GH#1
 
             The method is now a callable argument which accepts any
             user defined function or callable.
+
+        Return Data
+        -----------
+
+        Inclusion of :attr:`axis` makes the output array dimension
+        dynamic. However, returns a reduced array based on method.
+
+        :rtype:  np.ndarray
+        :return: A reduced array based on the input function.
         """
 
         return method(xs, axis = axis)
