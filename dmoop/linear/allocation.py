@@ -92,8 +92,8 @@ class LinearNDAllocation(BaseConstruct):
     def delta(
         self,
         method : callable,
-        axis : int = 1,
-        abs : bool = True,
+        axis : int,
+        abs : bool,
         **kwargs
     ) -> np.ndarray:
         """
