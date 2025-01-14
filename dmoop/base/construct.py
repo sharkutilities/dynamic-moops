@@ -15,7 +15,12 @@ class BaseConstruct(ABC):
     the child classes to maintain consistency.
     """
 
-    def __init__(self, xs : Iterable, senses : Iterable, **kwargs) -> None:
+    def __init__(
+        self,
+        xs : Iterable,
+        senses : Iterable,
+        modelname : str = None
+    ) -> None:
         self.xs = self._xs(xs) # ? conversion, assertion of `xs`
         self.senses = self._senses(senses) # ? problem objective(s)
 
@@ -24,8 +29,9 @@ class BaseConstruct(ABC):
         # q: no. of features, which must be equal to the senses shape
         self.N, self.q = self.xs.shape[::-1]
 
-        # ? optional arguments with defaults for base construct
-        self._modelname = kwargs.get("modelname", None)
+        # ! base construct should not have a kwargs control, so
+        # setting the modelname attribute here, defaults to None
+        self._modelname = modelname
 
 
     @staticmethod
@@ -120,6 +126,16 @@ class BaseConstruct(ABC):
         :param array: An iterable non-ragged sequence of the shape
             :attr:`(n, q)` where :attr:`n` is the number of data points,
             while `q` is the number of features.
+
+        Return Data
+        -----------
+
+        The main objective of the method is to ensure validity of the
+        input feature and return it as a N-D array.
+
+        :rtype:  np.ndarray
+        :return: An N-D array of shape :attr:`(n, q)`, where the
+            sequence is not ragged and ensures validity.
         """
 
         return np.stack(np.array(array, dtype = float))
