@@ -37,8 +37,8 @@ class BaseConstruct(ABC):
     @staticmethod
     def describe(
         xs : np.ndarray,
-        axis : int = None,
         method : callable = np.mean,
+        axis : int = None,
         **kwargs
     ) -> np.ndarray:
         """

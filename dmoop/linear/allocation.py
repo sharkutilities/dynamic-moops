@@ -89,42 +89,62 @@ class LinearNDAllocation(BaseConstruct):
         # self.xs = self.treatoutlier(self.xs, *args, **kwargs)
 
 
-    def delta(self, **kwargs) -> np.ndarray:
+    def delta(
+        self,
+        method : callable,
+        axis : int = 1,
+        abs : bool = True,
+        **kwargs
+    ) -> np.ndarray:
         """
-        Calculate a Delta :attr:`Δ` Factor basis the Aggregation Function
+        Delta Factor for Linear N-Dimensional Allocation
 
-        For a given objective funtion, calculates a :attr:`delta`
-        factor which is based on the aggregation function like mean
-        or median values. The value is mathematically represented
-        as :math:`|x_i - f(x)|` where :math:`f` is the aggregation
-        function of choice.
+        The delta is a mathematical value that tries to calculate the
+        deviation of :math:`|x_i - f(x)|` where :math:`f` is an
+        aggregation function of choice, like mean or median.
+
+        The factor considers the senses of each dimension and
+        returns a value like :math:`i, sense = 1` (maximization) or
+        reciprocal value in case of minimization.
+
+        :type  method: callable
+        :param method: An aggregation function available in the
+            :mod:`numpy` library.
+
+        :type  axis: int
+        :param axis: Axis along which the method is applied, defaults
+            to `1` which means the method is applied along the
+            second axis. Defaults to 1.
 
         Keyword Arguments
         -----------------
-        The function can be internally controlled using only the
-        defined keyword arguments:
 
-            * **methods** (*list*): List of methods for aggregation
-            across each individual objective function(s). Defaults to
-            "mean" across all th objective funtions.
+        The following keyword arguments are defined for control and
+        modification of the delta factor:
 
-            * **factors** (*list*): The factor works as either a
-            *penalty* in case of premiumization (when the objective
-            is minimization) or *appreciation* (when the objective is
-            maximization) depending upon the sense of the objective
-            function. Defaults to :attr:`1` i.e., no factoring.
-            Given a *factor* the final resolved mathematical expression
-            is :math:`\delta = \tau_i * |x_i - f(x)|` where
-            :math:`\tau_i` is the factor for the objective function.
+            * **described** (*dict*): The method alows keyword argument
+                controls for the underlying function :func:`describe()`
+                which takes in any arguments which is accepted by the
+                passed method.
         """
 
-        methods = kwargs.get("methods", [np.mean] * self.N)
-        factors = np.array(kwargs.get("factors", np.ones(self.N)))
+        described = self.describe(
+            self.xs,
+            method = method,
+            axis = axis,
+            **kwargs.get("described", dict())
+        ).reshape(-1, 1) # reshape to broadcast with xs
 
-        delta = np.abs([
-            x - self.describe(x, method = method)
-            for method, x in zip(methods, self.xs)
-        ]) * factors.reshape(-1, 1)
+        # the base delta is the difference between self, described
+        # the value is absolute or not is again parametric controlled
+        delta = (self.xs - described)
+        delta = np.abs(delta) if abs else delta
+
+        # ? finally, we inverse the value if sense if minimization
+        delta = np.array([
+            list(1/xs) if sense == -1 else xs
+            for xs, sense in zip(delta, self.senses)
+        ])
 
         return delta
 
