@@ -158,5 +158,21 @@ class SimpleLinearDeltaOptimizer(BaseConstruct):
         self.factors = self.delta(method, axis, absolute, **kwargs)
         return None
 
-    def predict(self, *args, **kwargs) -> np.ndarray:
-        return self.factors / self.factors.sum()
+    def predict(self, roundvalue : bool = True) -> np.ndarray:
+        percentages = self.factors / self.factors.sum()
+
+        # ! if roundvalue, then round percentage to nearest 5%
+        if roundvalue:
+            percentages = np.round(percentages / 0.05) * 0.05
+
+            # find the difference to 100% and distribute the remainder
+            difference = 1 - percentages.sum()
+            for _ in range(int(abs(difference) / 5)):
+                if difference > 0:
+                    percentages[np.argmin(percentages)] += 0.05
+                elif difference < 0:
+                    percentages[np.argmin(percentages)] -= 0.05
+                else:
+                    pass
+
+        return np.round(percentages, 4)
