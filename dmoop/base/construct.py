@@ -37,7 +37,7 @@ class BaseConstruct(ABC):
     @staticmethod
     def describe(
         xs : np.ndarray,
-        method : callable = np.mean,
+        method : callable | Iterable[callable] = np.mean,
         axis : int = None,
         **kwargs
     ) -> np.ndarray:
@@ -73,6 +73,11 @@ class BaseConstruct(ABC):
             The method is now a callable argument which accepts any
             user defined function or callable.
 
+        ..versionchanged:: 2025-01-30
+
+            Allow a list of callable to be passed, this overrides the
+            axis argument and for each axis, the function is called.
+
         Keyword Arguments
         -----------------
 
@@ -90,7 +95,16 @@ class BaseConstruct(ABC):
         :return: A reduced array based on the input function.
         """
 
-        return method(xs, axis = axis, **kwargs)
+        described = np.array([])
+
+        if hasattr(method, "__call__"):
+            described = method(xs, axis = axis, **kwargs)
+        elif hasattr(method, "__iter__"):
+            described = np.array([m(x) for x, m in zip(xs, method)])
+        else:
+            raise ValueError("Invalid Controls for the Method")
+
+        return described
 
 
     @abstractmethod
