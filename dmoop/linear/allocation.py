@@ -83,7 +83,7 @@ class SimpleLinearDeltaOptimizer(BaseConstruct):
         )
 
 
-    def delta(
+    def __delta__(
         self,
         method : callable | Iterable[callable],
         axis : int,
@@ -160,8 +160,8 @@ class SimpleLinearDeltaOptimizer(BaseConstruct):
         reciprocal : bool = True,
         **kwargs
     ) -> None:
-        self.factors = self.delta(method, axis, absolute, reciprocal, **kwargs)
+        self.delta = self.__delta__(method, axis, absolute, reciprocal, **kwargs)
         return None
 
     def predict(self) -> np.ndarray:
-        return self.factors / self.factors.sum()
+        return None
