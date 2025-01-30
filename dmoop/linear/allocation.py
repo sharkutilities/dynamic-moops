@@ -82,12 +82,6 @@ class SimpleLinearDeltaOptimizer(BaseConstruct):
             modelname = kwargs.get("modelname", None)
         )
 
-        # todo: outlier treatment at axis level is currently dropped
-        # we need a control based on either senses, or user defined,
-        # better not to keep, and make provision such that the outlier
-        # are assigned a very low value thus maybe skipped externally
-        # self.xs = self.treatoutlier(self.xs, *args, **kwargs)
-
 
     def delta(
         self,
