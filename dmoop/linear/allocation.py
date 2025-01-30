@@ -85,9 +85,10 @@ class SimpleLinearDeltaOptimizer(BaseConstruct):
 
     def delta(
         self,
-        method : callable,
+        method : callable | Iterable[callable],
         axis : int,
         absolute : bool,
+        reciprocal : bool,
         **kwargs
     ) -> np.ndarray:
         """
@@ -109,6 +110,14 @@ class SimpleLinearDeltaOptimizer(BaseConstruct):
         :param axis: Axis along which the method is applied, defaults
             to `1` which means the method is applied along the
             second axis. Defaults to 1.
+
+        :type  absolute: bool
+        :param absolute: Return absolute value of delta, which is
+            derived using :math:`|x_i - f(x)|` method.
+
+        :type  reciprocal: bool
+        :param reciprocal: Inverse the value if sense is minimization,
+            else keep the original, defaults to True.
 
         Keyword Arguments
         -----------------
@@ -134,22 +143,24 @@ class SimpleLinearDeltaOptimizer(BaseConstruct):
         delta = (self.xs - described)
         delta = np.abs(delta) if absolute else delta
 
-        # ? finally, we inverse the value if sense if minimization
+        # ? finally, we inverse the value if sense if minimization, and
+        # if reciprocal argument is true, else keep the original
         delta = np.array([
             list(1/xs) if sense == -1 else xs
             for xs, sense in zip(delta, self.senses)
-        ])
+        ]) if reciprocal else delta
 
-        return np.array([np.prod(delta[:, idx]) for idx in range(self.N)])
+        return delta
 
     def fit(
         self,
-        method : callable = np.mean,
+        method : callable | Iterable[callable] = np.mean,
         axis : int = 1,
         absolute : bool = True,
+        reciprocal : bool = True,
         **kwargs
     ) -> None:
-        self.factors = self.delta(method, axis, absolute, **kwargs)
+        self.factors = self.delta(method, axis, absolute, reciprocal, **kwargs)
         return None
 
     def predict(self) -> np.ndarray:
