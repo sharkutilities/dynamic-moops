@@ -10,3 +10,4 @@ attribute from the called function - this gives more flexibility.
 """
 
 from dmoop.factors import linear
+from dmoop.factors import nonlinear
