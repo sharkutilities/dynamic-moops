@@ -13,5 +13,5 @@ objectives with premiumizationpenalty and value appreciation controls.
 __version__ = "0.0.1.dev0"
 
 # register for init-time options registrations
-from dmoop import linear # noqa: F401, F403 # pyright: ignore[reportMissingImports]
+from dmoop import models # noqa: F401, F403 # pyright: ignore[reportMissingImports]
 from dmoop import factors # noqa: F401, F403 # pyright: ignore[reportMissingImports]
