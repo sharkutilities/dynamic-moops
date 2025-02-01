@@ -11,7 +11,7 @@ from dmoop.factors import nonlinear
 from dmoop.base import BaseConstruct
 
 
-class SimpleLinearDeltaOptimizer(BaseConstruct):
+class DeltaNonLinearOptimizer(BaseConstruct):
     """
     A Linear Allocation Algorithm for N-Dimensional Optimization
 
@@ -80,85 +80,24 @@ class SimpleLinearDeltaOptimizer(BaseConstruct):
         )
 
 
-    def __delta__(
-        self,
-        method : callable | Iterable[callable],
-        axis : int,
-        absolute : bool,
-        reciprocal : bool,
-        **kwargs
-    ) -> np.ndarray:
-        """
-        Delta Factor for Linear N-Dimensional Allocation
-
-        The delta is a mathematical value that tries to calculate the
-        deviation of :math:`|x_i - f(x)|` where :math:`f` is an
-        aggregation function of choice, like mean or median.
-
-        The factor considers the senses of each dimension and
-        returns a value like :math:`i, sense = 1` (maximization) or
-        reciprocal value in case of minimization.
-
-        :type  method: callable
-        :param method: An aggregation function available in the
-            :mod:`numpy` library.
-
-        :type  axis: int
-        :param axis: Axis along which the method is applied, defaults
-            to `1` which means the method is applied along the
-            second axis. Defaults to 1.
-
-        :type  absolute: bool
-        :param absolute: Return absolute value of delta, which is
-            derived using :math:`|x_i - f(x)|` method.
-
-        :type  reciprocal: bool
-        :param reciprocal: Inverse the value if sense is minimization,
-            else keep the original, defaults to True.
-
-        Keyword Arguments
-        -----------------
-
-        The following keyword arguments are defined for control and
-        modification of the delta factor:
-
-            * **described** (*dict*): The method alows keyword argument
-                controls for the underlying function :func:`describe()`
-                which takes in any arguments which is accepted by the
-                passed method.
-        """
-
-        described = self.describe(
-            self.xs,
-            method = method,
-            axis = axis,
-            **kwargs.get("described", dict())
-        ).reshape(-1, 1) # reshape to broadcast with xs
-
-        # the base delta is the difference between self, described
-        # the value is absolute or not is again parametric controlled
-        delta = (self.xs - described)
-        delta = np.abs(delta) if absolute else delta
-
-        # ? finally, we inverse the value if sense if minimization, and
-        # if reciprocal argument is true, else keep the original
-        delta = np.array([
-            list(1/xs) if sense == -1 else xs
-            for xs, sense in zip(delta, self.senses)
-        ]) if reciprocal else delta
-
-        return delta
-
     def fit(
         self,
         method : callable | Iterable[callable] = np.mean,
-        axis : int = 1,
-        absolute : bool = True,
-        reciprocal : bool = True,
         **kwargs
     ) -> None:
-        self.delta = self.__delta__(method, axis, absolute, reciprocal, **kwargs)
+
+        deltakwargs = {
+            key : kwargs[key] for key in kwargs.keys()
+            if key in ["absolute", "addonbase", "reciprocal"]
+        }
+
+        self.delta = nonlinear.delta(
+            self.xs, self.senses, method = method,
+
+            # all the required kwargs are passed into the model
+            **deltakwargs
+        )
         return None
 
     def predict(self) -> np.ndarray:
-        return None
+        return self.delta / self.delta.sum()
