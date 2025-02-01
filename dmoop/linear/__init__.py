@@ -9,4 +9,4 @@ variables :attr:`f(x, y)` the graph is a straight line or in case of
 three variables :attr:`f(x, y, z)` it is a plane.
 """
 
-from dmoop.linear.allocation import SimpleLinearDeltaOptimizer # pyright: ignore[reportMissingImports]
+from dmoop.linear.simple import SimpleLinearOptimizer # pyright: ignore[reportMissingImports]
